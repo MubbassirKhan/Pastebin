@@ -1,125 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { nanoid } from 'nanoid';
-import { createPaste, getCurrentTime, Paste } from '@/lib/db';
-import { headers } from 'next/headers';
-
-interface CreatePasteRequest {
-  content?: unknown;
-  ttl_seconds?: unknown;
-  max_views?: unknown;
-}
+import { supabaseServer } from '@/lib/supabase/server';
+import { generatePasteId } from '@/lib/utils/paste-id';
+import { validateCreatePasteRequest } from '@/lib/utils/validation';
+import { getCurrentTime, calculateExpiryDate } from '@/lib/utils/time';
+import { APP_URL } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
-    let body: CreatePasteRequest;
+    let body: any;
     
     try {
       body = await request.json();
     } catch {
       return NextResponse.json(
-        { error: 'Invalid JSON body' },
+        { message: 'Invalid JSON body' },
         { status: 400 }
       );
     }
     
-    // Validate content
-    if (body.content === undefined || body.content === null) {
+    // Validate request
+    const validation = validateCreatePasteRequest(body);
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'content is required' },
+        { message: validation.error.message },
         { status: 400 }
       );
     }
     
-    if (typeof body.content !== 'string') {
-      return NextResponse.json(
-        { error: 'content must be a string' },
-        { status: 400 }
-      );
-    }
-    
-    if (body.content.length === 0) {
-      return NextResponse.json(
-        { error: 'content cannot be empty' },
-        { status: 400 }
-      );
-    }
-    
-    // Validate ttl_seconds (optional)
-    let ttlSeconds: number | null = null;
-    if (body.ttl_seconds !== undefined && body.ttl_seconds !== null) {
-      if (typeof body.ttl_seconds !== 'number' || !Number.isInteger(body.ttl_seconds)) {
-        return NextResponse.json(
-          { error: 'ttl_seconds must be an integer' },
-          { status: 400 }
-        );
-      }
-      if (body.ttl_seconds < 1) {
-        return NextResponse.json(
-          { error: 'ttl_seconds must be >= 1' },
-          { status: 400 }
-        );
-      }
-      ttlSeconds = body.ttl_seconds;
-    }
-    
-    // Validate max_views (optional)
-    let maxViews: number | null = null;
-    if (body.max_views !== undefined && body.max_views !== null) {
-      if (typeof body.max_views !== 'number' || !Number.isInteger(body.max_views)) {
-        return NextResponse.json(
-          { error: 'max_views must be an integer' },
-          { status: 400 }
-        );
-      }
-      if (body.max_views < 1) {
-        return NextResponse.json(
-          { error: 'max_views must be >= 1' },
-          { status: 400 }
-        );
-      }
-      maxViews = body.max_views;
-    }
+    const { content, ttl_seconds, max_views } = validation.data;
     
     // Generate unique ID
-    const id = nanoid(10);
+    const id = generatePasteId();
     
     // Get current time (supports TEST_MODE)
-    const headersList = await headers();
-    const testNowMs = headersList.get('x-test-now-ms');
-    const now = getCurrentTime(testNowMs);
+    const currentTime = getCurrentTime(request.headers);
     
     // Calculate expiry time
-    let expiresAt: number | null = null;
-    if (ttlSeconds !== null) {
-      expiresAt = now + (ttlSeconds * 1000);
+    let expiresAt: string | null = null;
+    if (ttl_seconds) {
+      const expiryDate = calculateExpiryDate(ttl_seconds, currentTime);
+      expiresAt = expiryDate.toISOString();
     }
     
-    // Create paste object
-    const paste: Paste = {
-      id,
-      content: body.content,
-      created_at: now,
-      expires_at: expiresAt,
-      max_views: maxViews,
-      view_count: 0,
-    };
+    // Insert paste into database
+    const { error } = await supabaseServer
+      .from('pastes')
+      .insert({
+        id,
+        content,
+        created_at: currentTime.toISOString(),
+        expires_at: expiresAt,
+        max_views: max_views ?? null,
+        view_count: 0
+      } as any);
     
-    // Save to database
-    await createPaste(paste);
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json(
+        { message: 'Failed to create paste' },
+        { status: 500 }
+      );
+    }
     
-    // Build response URL
-    const protocol = request.headers.get('x-forwarded-proto') || 'https';
-    const host = request.headers.get('host') || 'localhost:3000';
-    const url = `${protocol}://${host}/p/${id}`;
-    
+    // Return response
+    const url = `${APP_URL}/p/${id}`;
     return NextResponse.json(
       { id, url },
-      { status: 201 }
+      { status: 200 }
     );
+    
   } catch (error) {
-    console.error('Error creating paste:', error);
+    console.error('Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { message: 'Internal server error' },
       { status: 500 }
     );
   }

@@ -1,0 +1,375 @@
+
+ FAIL  __tests__/integration/robustness.test.ts (31.669 s)
+  ● should handle concurrent fetches without negative remaining_views
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      11 |
+      12 |   describe('Concurrent access', () => {
+    > 13 |     it('should handle concurrent fetches without negative remaining_views', async () => {
+         |     ^
+      14 |       // Create paste with limited views
+      15 |       const createResponse = await fetch(`${BASE_URL}/api/pastes`, {
+      16 |         method: 'POST',
+
+      at SuiteContext.it (__tests__/integration/robustness.test.ts:13:5)     
+      at SuiteContext.<anonymous> (__tests__/integration/robustness.test.ts:12:11)
+      at Object.<anonymous> (__tests__/integration/robustness.test.ts:9:9)   
+
+  ● should not serve paste beyond view constraint under concurrent load      
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      42 |     })
+      43 |
+    > 44 |     it('should not serve paste beyond view constraint under concurrent load', async () => {
+         |     ^
+      45 |       // Create paste with 1 view
+      46 |       const createResponse = await fetch(`${BASE_URL}/api/pastes`, {
+      47 |         method: 'POST',
+
+      at SuiteContext.it (__tests__/integration/robustness.test.ts:44:5)     
+      at SuiteContext.<anonymous> (__tests__/integration/robustness.test.ts:12:11)
+      at Object.<anonymous> (__tests__/integration/robustness.test.ts:9:9)   
+
+  ● should consistently return 404 for unavailable paste
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      68 |
+      69 |   describe('Error responses consistency', () => {
+    > 70 |     it('should consistently return 404 for unavailable paste', async () => {
+         |     ^
+      71 |       const nonExistentId = 'definitely-does-not-exist-12345'     
+      72 |       
+      73 |       // Make multiple requests
+
+      at SuiteContext.it (__tests__/integration/robustness.test.ts:70:5)     
+      at SuiteContext.<anonymous> (__tests__/integration/robustness.test.ts:69:11)
+      at Object.<anonymous> (__tests__/integration/robustness.test.ts:9:9)   
+
+  ● should handle reasonably large paste content
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      109 |
+      110 |   describe('Large content handling', () => {
+    > 111 |     it('should handle reasonably large paste content', async () => {
+          |     ^
+      112 |       const largeContent = 'A'.repeat(100000) // 100KB of text   
+      113 |       
+      114 |       const createResponse = await fetch(`${BASE_URL}/api/pastes`, {
+
+      at SuiteContext.it (__tests__/integration/robustness.test.ts:111:5)    
+      at SuiteContext.<anonymous> (__tests__/integration/robustness.test.ts:110:11)
+      at Object.<anonymous> (__tests__/integration/robustness.test.ts:9:9)   
+
+# Subtest: GET /api/pastes/:id
+    # Subtest: Successful retrieval
+    ok 1 - Successful retrieval
+      ---
+      duration_ms: 0.7464
+      type: 'suite'
+      ...
+    # Subtest: Paste with constraints
+    ok 2 - Paste with constraints
+      ---
+      duration_ms: 0.7362
+      type: 'suite'
+      ...
+    # Subtest: Unavailable pastes
+    ok 3 - Unavailable pastes
+      ---
+      duration_ms: 13.3448
+      type: 'suite'
+      ...
+    # Subtest: No negative remaining_views
+    ok 4 - No negative remaining_views
+      ---
+      duration_ms: 0.1971
+      type: 'suite'
+      ...
+    1..4
+ok 2 - GET /api/pastes/:id
+  ---
+  duration_ms: 25.6696
+  type: 'suite'
+  ...
+ FAIL  __tests__/integration/ttl-expiry.test.ts (34.452 s)
+  ● should be available before expiry
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      12 |
+      13 |   describe('Paste with TTL', () => {
+    > 14 |     it('should be available before expiry', async () => {
+         |     ^
+      15 |       const now = Date.now()
+      16 |       
+      17 |       // Create paste with 60 second TTL
+
+      at SuiteContext.it (__tests__/integration/ttl-expiry.test.ts:14:5)     
+      at SuiteContext.<anonymous> (__tests__/integration/ttl-expiry.test.ts:13:11)
+      at Object.<anonymous> (__tests__/integration/ttl-expiry.test.ts:9:9)   
+
+  ● should return 404 after expiry
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      41 |     })
+      42 |
+    > 43 |     it('should return 404 after expiry', async () => {
+         |     ^
+      44 |       const now = Date.now()
+      45 |       
+      46 |       // Create paste with 60 second TTL
+
+      at SuiteContext.it (__tests__/integration/ttl-expiry.test.ts:43:5)     
+      at SuiteContext.<anonymous> (__tests__/integration/ttl-expiry.test.ts:13:11)
+      at Object.<anonymous> (__tests__/integration/ttl-expiry.test.ts:9:9)   
+
+  ● should return 404 exactly at expiry time
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      67 |     })
+      68 |
+    > 69 |     it('should return 404 exactly at expiry time', async () => {  
+         |     ^
+      70 |       const now = Date.now()
+      71 |       
+      72 |       // Create paste with 100 second TTL
+
+      at SuiteContext.it (__tests__/integration/ttl-expiry.test.ts:69:5)     
+      at SuiteContext.<anonymous> (__tests__/integration/ttl-expiry.test.ts:13:11)
+      at Object.<anonymous> (__tests__/integration/ttl-expiry.test.ts:9:9)   
+
+# Subtest: Combined Constraints Tests
+    # Subtest: TTL expires first
+    ok 1 - TTL expires first
+      ---
+      duration_ms: 0.4771
+      type: 'suite'
+      ...
+    # Subtest: View limit reached first
+    ok 2 - View limit reached first
+      ---
+      duration_ms: 0.8034
+      type: 'suite'
+      ...
+    # Subtest: Simultaneous constraints
+    ok 3 - Simultaneous constraints
+      ---
+      duration_ms: 5.0565
+      type: 'suite'
+      ...
+    # Subtest: Edge cases
+    ok 4 - Edge cases
+      ---
+      duration_ms: 2.226
+      type: 'suite'
+      ...
+    1..4
+ok 2 - Combined Constraints Tests
+  ---
+  duration_ms: 11.9394
+  type: 'suite'
+  ...
+ FAIL  __tests__/integration/html-view.test.ts (25.402 s)
+  ● should render content safely (no script execution)
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      50 |     })
+      51 |
+    > 52 |     it('should render content safely (no script execution)', async () => {
+         |     ^
+      53 |       const maliciousContent = '<script>alert("XSS")</script><img src=x onerror="alert(1)">'
+      54 |       
+      55 |       const createResponse = await fetch(`${BASE_URL}/api/pastes`, {
+
+      at SuiteContext.it (__tests__/integration/html-view.test.ts:52:5)      
+      at SuiteContext.<anonymous> (__tests__/integration/html-view.test.ts:12:11)
+      at Object.<anonymous> (__tests__/integration/html-view.test.ts:9:9)    
+
+  ● should return 404 for expired paste
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 404
+    Received: 200
+
+      106 |       })
+      107 |       
+    > 108 |       expect(response.status).toBe(404)
+          |                               ^
+      109 |     })
+      110 |
+      111 |     it('should return 404 when view limit exceeded', async () => {
+
+      at Object.toBe (__tests__/integration/html-view.test.ts:108:31)        
+
+# Subtest: View Limit Tests
+    # Subtest: max_views = 1
+    ok 1 - max_views = 1
+      ---
+      duration_ms: 2.9175
+      type: 'suite'
+      ...
+    # Subtest: max_views = 2
+    ok 2 - max_views = 2
+      ---
+      duration_ms: 0.8912
+      type: 'suite'
+      ...
+    # Subtest: max_views = 5
+    ok 3 - max_views = 5
+      ---
+      duration_ms: 0.7919
+      type: 'suite'
+      ...
+    # Subtest: Unlimited views
+    ok 4 - Unlimited views
+      ---
+      duration_ms: 0.4141
+      type: 'suite'
+      ...
+    1..4
+ok 3 - View Limit Tests
+  ---
+  duration_ms: 9.6919
+  type: 'suite'
+  ...
+ PASS  __tests__/integration/combined-constraints.test.ts (11.726 s)
+# Subtest: /api/healthz
+ok 3 - /api/healthz
+  ---
+  duration_ms: 1.2773
+  type: 'suite'
+  ...
+ FAIL  __tests__/api/pastes-fetch.test.ts (20.335 s)
+  ● should return ISO timestamp for expires_at when TTL is set
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "2026-01-31T09:11:33.635+00:00"
+    Received: "2026-01-31T09:11:33.635Z"
+
+      109 |       // Validate ISO 8601 format
+      110 |       const date = new Date(data.expires_at)
+    > 111 |       expect(date.toISOString()).toBe(data.expires_at)
+          |                                  ^
+      112 |     })
+      113 |
+      114 |     it('should count API fetches as views', async () => {        
+
+      at Object.toBe (__tests__/api/pastes-fetch.test.ts:111:34)
+
+  ● should never return negative remaining_views
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      157 |
+      158 |   describe('No negative remaining_views', () => {
+    > 159 |     it('should never return negative remaining_views', async () => {
+          |     ^
+      160 |       // Create paste with 1 max view
+      161 |       const createResponse = await fetch(`${BASE_URL}/api/pastes`, {
+      162 |         method: 'POST',
+
+      at SuiteContext.it (__tests__/api/pastes-fetch.test.ts:159:5)
+      at SuiteContext.<anonymous> (__tests__/api/pastes-fetch.test.ts:158:11)
+      at Object.<anonymous> (__tests__/api/pastes-fetch.test.ts:9:9)
+
+ FAIL  __tests__/integration/view-limits.test.ts (16.248 s)
+  ● should track remaining_views correctly
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      68 |
+      69 |   describe('max_views = 5', () => {
+    > 70 |     it('should track remaining_views correctly', async () => {    
+         |     ^
+      71 |       // Create paste with max_views = 5
+      72 |       const createResponse = await fetch(`${BASE_URL}/api/pastes`, {
+      73 |         method: 'POST',
+
+      at SuiteContext.it (__tests__/integration/view-limits.test.ts:70:5)    
+      at SuiteContext.<anonymous> (__tests__/integration/view-limits.test.ts:69:11)
+      at Object.<anonymous> (__tests__/integration/view-limits.test.ts:9:9)  
+
+  ● should allow multiple fetches when no max_views is set
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+       98 |
+       99 |   describe('Unlimited views', () => {
+    > 100 |     it('should allow multiple fetches when no max_views is set', async () => {
+          |     ^
+      101 |       // Create paste without max_views
+      102 |       const createResponse = await fetch(`${BASE_URL}/api/pastes`, {
+      103 |         method: 'POST',
+
+      at SuiteContext.it (__tests__/integration/view-limits.test.ts:100:5)   
+      at SuiteContext.<anonymous> (__tests__/integration/view-limits.test.ts:99:11)
+      at Object.<anonymous> (__tests__/integration/view-limits.test.ts:9:9)  
+
+ FAIL  __tests__/api/healthz.test.ts (15.426 s)
+  ● should return HTTP 200
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      10 |   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+      11 |
+    > 12 |   it('should return HTTP 200', async () => {
+         |   ^
+      13 |     const response = await fetch(`${BASE_URL}/api/healthz`)       
+      14 |     expect(response.status).toBe(200)
+      15 |   })
+
+      at SuiteContext.it (__tests__/api/healthz.test.ts:12:3)
+      at Object.<anonymous> (__tests__/api/healthz.test.ts:9:9)
+
+  ● should return ok: true
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."        
+
+      24 |   })
+      25 |
+    > 26 |   it('should return ok: true', async () => {
+         |   ^
+      27 |     const response = await fetch(`${BASE_URL}/api/healthz`)       
+      28 |     const data = await response.json()
+      29 |     expect(data).toHaveProperty('ok')
+
+      at SuiteContext.it (__tests__/api/healthz.test.ts:26:3)
+      at Object.<anonymous> (__tests__/api/healthz.test.ts:9:9)
+
+1..3
+# tests 0
+# suites 10
+# pass 0
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 55100.6436
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+Test Suites: 6 failed, 2 passed, 8 total
+Tests:       15 failed, 44 passed, 59 total
+Snapshots:   0 total
+Time:        72.07 s
+Ran all test suites.

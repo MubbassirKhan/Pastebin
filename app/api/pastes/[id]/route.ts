@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPaste, incrementViewCount, isPasteExpired, getRemainingViews, getCurrentTime, deletePaste } from '@/lib/db';
-import { headers } from 'next/headers';
+import { supabaseServer } from '@/lib/supabase/server';
+import { getCurrentTime, isPasteExpired } from '@/lib/utils/time';
+
+type PasteData = {
+  id: string;
+  content: string;
+  created_at: string;
+  expires_at: string | null;
+  max_views: number | null;
+  view_count: number;
+};
 
 export async function GET(
   request: NextRequest,
@@ -10,61 +19,73 @@ export async function GET(
     const { id } = await params;
     
     // Get current time (supports TEST_MODE)
-    const headersList = await headers();
-    const testNowMs = headersList.get('x-test-now-ms');
-    const currentTime = getCurrentTime(testNowMs);
+    const currentTime = getCurrentTime(request.headers);
     
     // Get paste from database
-    const paste = await getPaste(id);
+    const { data: paste, error } = await supabaseServer
+      .from('pastes')
+      .select('*')
+      .eq('id', id)
+      .single();
     
-    if (!paste) {
+    if (error || !paste) {
       return NextResponse.json(
-        { error: 'Paste not found' },
+        { message: 'Paste not found' },
+        { status: 404 }
+      );
+    }
+
+    const pasteData = paste as PasteData;
+    
+    // Check if paste is expired by TTL
+    if (isPasteExpired(pasteData.expires_at, currentTime)) {
+      return NextResponse.json(
+        { message: 'Paste not found' },
         { status: 404 }
       );
     }
     
-    // Check if paste is expired (by TTL or view count)
-    if (isPasteExpired(paste, currentTime)) {
-      // Clean up expired paste
-      await deletePaste(id);
+    // Check if view limit exceeded BEFORE incrementing
+    if (pasteData.max_views !== null && pasteData.view_count >= pasteData.max_views) {
       return NextResponse.json(
-        { error: 'Paste not found' },
+        { message: 'Paste not found' },
         { status: 404 }
       );
     }
     
-    // Increment view count
-    const updatedPaste = await incrementViewCount(id);
+    // Increment view count atomically
+    const updateData: any = { view_count: pasteData.view_count + 1 };
+    const { data: updatedPaste, error: updateError } = await (supabaseServer
+      .from('pastes') as any)
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
     
-    if (!updatedPaste) {
+    if (updateError || !updatedPaste) {
       return NextResponse.json(
-        { error: 'Paste not found' },
-        { status: 404 }
+        { message: 'Failed to fetch paste' },
+        { status: 500 }
       );
     }
+
+    const updatedPasteData = updatedPaste as PasteData;
     
     // Calculate remaining views after increment
     let remainingViews: number | null = null;
-    if (updatedPaste.max_views !== null) {
-      remainingViews = Math.max(0, updatedPaste.max_views - updatedPaste.view_count);
-    }
-    
-    // Format expires_at as ISO string or null
-    let expiresAtIso: string | null = null;
-    if (updatedPaste.expires_at !== null) {
-      expiresAtIso = new Date(updatedPaste.expires_at).toISOString();
+    if (updatedPasteData.max_views !== null) {
+      remainingViews = Math.max(0, updatedPasteData.max_views - updatedPasteData.view_count);
     }
     
     return NextResponse.json({
-      content: updatedPaste.content,
+      content: updatedPasteData.content,
       remaining_views: remainingViews,
-      expires_at: expiresAtIso,
+      expires_at: updatedPasteData.expires_at,
     }, { status: 200 });
   } catch (error) {
     console.error('Error fetching paste:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { message: 'Internal server error' },
       { status: 500 }
     );
   }

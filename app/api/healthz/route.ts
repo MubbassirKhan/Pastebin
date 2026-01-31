@@ -1,23 +1,21 @@
 import { NextResponse } from 'next/server';
-import { checkDbConnection } from '@/lib/db';
+import { supabaseServer } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
-    const dbOk = await checkDbConnection();
+    // Test database connection by running a simple query
+    const { error } = await supabaseServer
+      .from('pastes')
+      .select('id')
+      .limit(1);
     
-    if (!dbOk) {
-      return NextResponse.json(
-        { ok: false, error: 'Database connection failed' },
-        { status: 503 }
-      );
+    if (error) {
+      return NextResponse.json({ ok: false }, { status: 200 });
     }
     
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
     console.error('Health check error:', error);
-    return NextResponse.json(
-      { ok: false, error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false }, { status: 200 });
   }
 }

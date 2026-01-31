@@ -1,6 +1,6 @@
 # Pastebin Lite
 
-A simple, lightweight pastebin application built with Next.js and Upstash Redis for persistent storage.
+A simple, lightweight pastebin application built with Next.js and Supabase PostgreSQL for persistent storage.
 
 ## Features
 
@@ -9,22 +9,40 @@ A simple, lightweight pastebin application built with Next.js and Upstash Redis 
 - Automatic expiration based on time or view count
 - Safe content rendering (XSS protection)
 - RESTful API
-- Minimal UI for creating and viewing pastes
+- Clean, modern UI for creating and viewing pastes
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Runtime**: Node.js
-- **Persistence**: Upstash Redis (via Vercel integration)
+- **Persistence**: Supabase PostgreSQL
 - **Deployment**: Vercel
 
 ## Persistence Layer
 
-This application uses **Upstash Redis** for persistent storage. Upstash Redis provides:
-- Low-latency key-value storage
-- Automatic TTL support for paste expiration
-- Durable storage across deployments
-- Serverless-friendly REST API
+This application uses **Supabase PostgreSQL** for persistent storage. Supabase provides:
+- Reliable PostgreSQL database
+- Real-time capabilities
+- Row-level security
+- Auto-generated REST APIs
+- Built-in authentication (expandable for future features)
+
+### Database Schema
+
+The application uses a single `pastes` table:
+
+```sql
+CREATE TABLE pastes (
+  id TEXT PRIMARY KEY,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMPTZ,
+  max_views INTEGER,
+  view_count INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_pastes_expires_at ON pastes(expires_at);
+```
 
 ## API Endpoints
 
@@ -68,11 +86,13 @@ Response:
 }
 ```
 
+**Note**: Each successful API fetch increments the view count.
+
 ### View Paste (HTML)
 ```
 GET /p/:id
 ```
-Returns an HTML page displaying the paste content.
+Returns an HTML page displaying the paste content with a copy button.
 
 ## Running Locally
 
@@ -80,14 +100,14 @@ Returns an HTML page displaying the paste content.
 
 - Node.js 18+ 
 - npm or yarn
-- Redis instance (local or remote)
+- Supabase account (free tier available at https://supabase.com)
 
 ### Setup
 
 1. Clone the repository:
    ```bash
-   git clone <your-repo-url>
-   cd pastebin-lite
+   git clone https://github.com/MubbassirKhan/Pastebin.git
+   cd Pastebin
    ```
 
 2. Install dependencies:
@@ -95,9 +115,136 @@ Returns an HTML page displaying the paste content.
    npm install
    ```
 
-3. Set up environment variables:
+3. Set up Supabase:
    
-   Create a `.env.local` file with your Upstash Redis credentials:
+   - Create a new project at https://supabase.com
+   - Go to SQL Editor and run the database schema (see Database Schema section above)
+   - Get your API credentials from Settings > API
+
+4. Set up environment variables:
+   
+   Create a `.env.local` file with your Supabase credentials:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+5. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+6. Open http://localhost:3000 in your browser
+
+## Deployment
+
+### Deploy to Vercel
+
+1. Push your code to GitHub
+
+2. Connect your repository to Vercel:
+   - Go to https://vercel.com
+   - Import your GitHub repository
+   - Add environment variables from `.env.local`
+   - Deploy
+
+3. Update `NEXT_PUBLIC_APP_URL` in Vercel environment variables to your deployed URL
+
+## Design Decisions
+
+### 1. **Supabase PostgreSQL for Persistence**
+   - Chose PostgreSQL over Redis/KV for better relational data handling
+   - Supabase provides auto-generated REST APIs and real-time capabilities
+   - Free tier is generous for small projects
+   - Built-in authentication ready for future user accounts feature
+
+### 2. **View Count Logic**
+   - Only API calls (`/api/pastes/:id`) increment view count
+   - HTML page views (`/p/:id`) do not count to avoid accidental consumption
+   - View limit is checked BEFORE incrementing to ensure exact limit enforcement
+
+### 3. **TTL Implementation**
+   - TTL stored as absolute timestamp (`expires_at`) rather than duration
+   - Supports deterministic testing via `x-test-now-ms` header when `TEST_MODE=1`
+   - Expired pastes return 404 immediately (no cleanup job needed)
+
+### 4. **Safe Content Rendering**
+   - Paste content is rendered in `<pre>` tags with proper escaping
+   - React automatically escapes content to prevent XSS attacks
+   - No syntax highlighting to keep implementation simple
+
+### 5. **Anonymous Pastes**
+   - No authentication required for creating/viewing pastes
+   - Simpler user experience for quick sharing
+   - Can be extended with Supabase Auth in future
+
+### 6. **ID Generation**
+   - Using `nanoid` with 10 characters for URL-friendly IDs
+   - Short, unique, and collision-resistant
+   - Better UX than UUIDs for sharing
+
+### 7. **Error Handling**
+   - All errors return proper HTTP status codes (400, 404, 500)
+   - Consistent JSON error format: `{ "message": "error description" }`
+   - 404 for all unavailable cases (not found, expired, view limit)
+
+## Project Structure
+
+```
+Pastebin/
+├── app/
+│   ├── api/
+│   │   ├── healthz/
+│   │   │   └── route.ts           # Health check endpoint
+│   │   └── pastes/
+│   │       ├── route.ts           # POST create paste
+│   │       └── [id]/
+│   │           └── route.ts       # GET fetch paste
+│   ├── p/
+│   │   └── [id]/
+│   │       ├── page.tsx           # HTML paste viewer
+│   │       └── not-found.tsx      # 404 page
+│   ├── layout.tsx                 # Root layout
+│   └── page.tsx                   # Home page (create paste)
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts              # Supabase client (browser)
+│   │   ├── server.ts              # Supabase server client
+│   │   └── types.ts               # Database type definitions
+│   ├── utils/
+│   │   ├── paste-id.ts            # ID generation
+│   │   ├── time.ts                # Time/expiry utilities
+│   │   └── validation.ts          # Request validation
+│   └── constants.ts               # App constants
+├── types/
+│   └── paste.ts                   # TypeScript interfaces
+├── .env.example                   # Example environment variables
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## Testing
+
+The application supports deterministic time testing:
+
+1. Set `TEST_MODE=1` environment variable
+2. Send `x-test-now-ms` header with milliseconds since epoch
+3. Expiry logic will use the header value as current time
+
+Example:
+```bash
+curl -X POST https://your-app.vercel.app/api/pastes \
+  -H "Content-Type: application/json" \
+  -H "x-test-now-ms: 1609459200000" \
+  -d '{"content": "test", "ttl_seconds": 60}'
+```
+
+## License
+
+MIT
    ```env
    KV_REST_API_URL=https://your-redis.upstash.io
    KV_REST_API_TOKEN=your-token
