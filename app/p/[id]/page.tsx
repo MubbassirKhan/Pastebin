@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import { supabaseServer } from '@/lib/supabase/server';
+import { getCurrentTime, isPasteExpired } from '@/lib/utils/time';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,6 +9,7 @@ interface PageProps {
 
 export default async function PastePage({ params }: PageProps) {
   const { id } = await params;
+  const headersList = await headers();
 
   // Fetch paste from database (HTML view doesn't increment view count)
   const { data: paste, error } = await supabaseServer
@@ -31,9 +34,9 @@ export default async function PastePage({ params }: PageProps) {
   
   const pasteData = paste as PasteData;
 
-  // Check if paste is expired or view limit exceeded
-  const now = new Date();
-  const isExpired = pasteData.expires_at && new Date(pasteData.expires_at) <= now;
+  // Check if paste is expired or view limit exceeded (supports TEST_MODE)
+  const currentTime = getCurrentTime(headersList);
+  const isExpired = isPasteExpired(pasteData.expires_at, currentTime);
   const viewLimitExceeded = pasteData.max_views !== null && pasteData.view_count >= pasteData.max_views;
 
   if (isExpired || viewLimitExceeded) {
