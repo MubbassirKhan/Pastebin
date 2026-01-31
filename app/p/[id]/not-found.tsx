@@ -1,3 +1,7 @@
+'use client';
+
+import Lottie from 'lottie-react';
+import animationData from '@/public/404_paste.json';
 export default function NotFoundPage() {
   return (
     <html lang="en">
@@ -5,50 +9,31 @@ export default function NotFoundPage() {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Paste Not Found</title>
-        <style>{`
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            color: #1e293b;
-          }
-          .container {
-            text-align: center;
-            padding: 40px;
-          }
-          h1 {
-            font-size: 48px;
-            color: #0f172a;
-            margin-bottom: 16px;
-          }
-          p {
-            font-size: 16px;
-            color: #64748b;
-            margin-bottom: 24px;
-          }
-          a {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #3b82f6;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-          }
-          a:hover {
-            background: #2563eb;
-          }
-        `}</style>
+        <script src="https://cdn.tailwindcss.com"></script>
       </head>
       <body>
-        <div className="container">
-          <h1>404</h1>
-          <p>Paste not found, expired, or view limit exceeded.</p>
-          <a href="/">Create New Paste</a>
+        <div className="min-h-screen flex flex-col">
+          <nav className="bg-white/80 backdrop-blur border-b border-neutral-200 px-6 py-4">
+            <div className="max-w-5xl mx-auto">
+              <a href="/" className="text-2xl font-semibold tracking-tight text-slate-900 no-underline">
+                Pastebin Lite
+              </a>
+            </div>
+          </nav>
+          <main className="flex-1 flex items-center justify-center px-6 py-10">
+            <div className="text-center max-w-md">
+              <div className="w-64 h-64 mx-auto mb-4">
+                  <Lottie animationData={animationData} loop={true} />
+                </div>
+              <h1 className="text-2xl font-semibold text-slate-900 mb-2">Paste Not Found</h1>
+              <p className="text-slate-500 text-sm mb-6">
+                The paste you're looking for doesn't exist, has expired, or has reached its view limit.
+              </p>
+              <a href="/" className="inline-block px-6 py-3 bg-black text-white no-underline text-sm font-semibold rounded-xl hover:bg-neutral-800 transition-colors shadow-sm">
+                Create New Paste
+              </a>
+            </div>
+          </main>
         </div>
       </body>
     </html>

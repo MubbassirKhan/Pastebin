@@ -98,7 +98,7 @@ Returns an HTML page displaying the paste content with a copy button.
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 22+ 
 - npm or yarn
 - Supabase account (free tier available at https://supabase.com)
 
@@ -133,6 +133,10 @@ Returns an HTML page displaying the paste content with a copy button.
    NODE_ENV=development  
    ```
 
+   **For Production (Vercel):** Set `NEXT_PUBLIC_APP_URL=https://pastylink.vercel.app` in Vercel dashboard.  
+   See [VERCEL_SETUP.md](./VERCEL_SETUP.md) for detailed instructions.
+
+it 
 5. Run the development server:
    ```bash
    npm run dev
