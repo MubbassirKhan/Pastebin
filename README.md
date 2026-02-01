@@ -1,26 +1,45 @@
 # Pastebin Lite
 
-A simple, lightweight pastebin application built with Next.js and Supabase PostgreSQL for persistent storage.
+A modern, lightweight pastebin application built with Next.js and Supabase PostgreSQL for persistent storage.
 
-## Features
+![Pastebin Lite](https://img.shields.io/badge/Next.js-16-black) ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green) ![Vercel](https://img.shields.io/badge/Deploy-Vercel-black)
 
-- Create text pastes with optional TTL (time-to-live) and view limits
-- Share pastes via unique URLs
-- Automatic expiration based on time or view count
-- Safe content rendering (XSS protection)
-- RESTful API
-- Clean, modern UI for creating and viewing pastes
+## ✨ Features
 
-## Tech Stack
+- 📝 Create text pastes with optional TTL (time-to-live) and view limits
+- 🔗 Share pastes via unique URLs
+- ⏰ Automatic expiration based on time or view count
+- 🛡️ Safe content rendering (XSS protection)
+- 🚀 RESTful API
+- 🎨 Clean, modern UI with professional design
+- 📱 Fully responsive design
+
+## 🛠️ Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
 - **Runtime**: Node.js
-- **Persistence**: Supabase PostgreSQL
+- **Database**: Supabase PostgreSQL
+- **Styling**: Tailwind CSS
 - **Deployment**: Vercel
 
-## Persistence Layer
+## 🚀 Deploy to Vercel
 
-This application uses **Supabase PostgreSQL** for persistent storage. Supabase provides:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/MubbassirKhan/Pastebin)
+
+### Environment Variables for Vercel
+
+Add these environment variables in your Vercel project settings:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | ✅ |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon/public key | ✅ |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key | ✅ |
+| `NEXT_PUBLIC_APP_URL` | Your production URL (e.g., https://your-app.vercel.app) | Optional |
+
+## 📦 Database Setup
+
+This application uses **Supabase PostgreSQL** for persistent storage.
 - Reliable PostgreSQL database
 - Real-time capabilities
 - Row-level security

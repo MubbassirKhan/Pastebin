@@ -11,3 +11,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+
+// Alias for browser usage
+export const supabaseBrowser = supabase;
