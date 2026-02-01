@@ -42,15 +42,20 @@ export default function PasteContent({ pasteId, content }: PasteContentProps) {
                 <p className="text-xs text-slate-500">Share text snippets instantly</p>
               </div>
             </a>
-            <a
-              href="/"
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl text-sm font-semibold no-underline hover:from-slate-800 hover:to-slate-700 transition-all shadow-md"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              New Paste
-            </a>
+            <div className="flex items-center gap-4">
+              <a href="/about" className="text-sm text-slate-600 hover:text-slate-900 transition-colors no-underline hidden sm:block">
+                About
+              </a>
+              <a
+                href="/"
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl text-sm font-semibold no-underline hover:from-slate-800 hover:to-slate-700 transition-all shadow-md"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                New Paste
+              </a>
+            </div>
           </div>
         </div>
       </nav>

@@ -87,8 +87,11 @@ export default function HomePage() {
                 <p className="text-xs text-slate-500">Share text snippets instantly</p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
-              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">● Online</span>
+            <div className="flex items-center gap-4">
+              <a href="/about" className="text-sm text-slate-600 hover:text-slate-900 transition-colors no-underline hidden sm:block">
+                About
+              </a>
+              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium text-xs hidden sm:block">● Online</span>
             </div>
           </div>
         </div>
